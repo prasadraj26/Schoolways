@@ -1,7 +1,61 @@
-import axios from "axios";
+import {
+  signInWithEmailAndPassword,
+  signOut
+} from "firebase/auth";
 
-const API = axios.create({
-  baseURL: "http://localhost:5000/api"
-});
+import { auth } from "../firebase/firebase";
 
-export const loginUser = (data) => API.post("/auth/login", data);
+// LOGIN USER
+
+export const loginUser = async (
+  email,
+  password
+) => {
+
+  try {
+
+    const userCredential =
+      await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+    return {
+      success: true,
+      user: userCredential.user
+    };
+
+  } catch (error) {
+
+    return {
+      success: false,
+      message: error.message
+    };
+
+  }
+};
+
+// LOGOUT USER
+
+export const logoutUser = async () => {
+
+  try {
+
+    await signOut(auth);
+
+    localStorage.clear();
+
+    return {
+      success: true
+    };
+
+  } catch (error) {
+
+    return {
+      success: false,
+      message: error.message
+    };
+
+  }
+};

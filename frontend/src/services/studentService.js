@@ -1,65 +1,111 @@
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  deleteDoc,
+  doc
+} from "firebase/firestore";
 
-const studentService = {
-  getAllStudents: async () => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/students`);
-      return response.json();
-    } catch (error) {
-      console.error('Get students error:', error);
-      throw error;
-    }
-  },
+import { db } from "../firebase/firebase";
 
-  getStudentById: async (id) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/students/${id}`);
-      return response.json();
-    } catch (error) {
-      console.error('Get student error:', error);
-      throw error;
-    }
-  },
+// COLLECTION
 
-  createStudent: async (studentData) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/students`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(studentData)
-      });
-      return response.json();
-    } catch (error) {
-      console.error('Create student error:', error);
-      throw error;
-    }
-  },
+const studentCollection =
+  collection(db, "students");
 
-  updateStudent: async (id, studentData) => {
-    try {
-      const response = await fetch(`${API_BASE_URL}/students/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(studentData)
-      });
-      return response.json();
-    } catch (error) {
-      console.error('Update student error:', error);
-      throw error;
-    }
-  },
+// ADD STUDENT
 
-  deleteStudent: async (id) => {
+export const addStudent =
+  async (studentData) => {
+
     try {
-      const response = await fetch(`${API_BASE_URL}/students/${id}`, {
-        method: 'DELETE'
-      });
-      return response.json();
+
+      await addDoc(
+        studentCollection,
+        studentData
+      );
+
+      return {
+        success: true
+      };
+
     } catch (error) {
-      console.error('Delete student error:', error);
-      throw error;
+
+      console.log(error);
+
+      return {
+        success: false,
+        message: error.message
+      };
+
     }
-  }
+
 };
 
-export default studentService;
+// GET STUDENTS
+
+export const getStudents =
+  async () => {
+
+    try {
+
+      const snapshot =
+        await getDocs(
+          studentCollection
+        );
+
+      const students =
+        snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+
+      return {
+        success: true,
+        data: students
+      };
+
+    } catch (error) {
+
+      console.log(error);
+
+      return {
+        success: false,
+        message: error.message
+      };
+
+    }
+
+};
+
+// DELETE STUDENT
+
+export const deleteStudent =
+  async (id) => {
+
+    try {
+
+      await deleteDoc(
+        doc(
+          db,
+          "students",
+          id
+        )
+      );
+
+      return {
+        success: true
+      };
+
+    } catch (error) {
+
+      console.log(error);
+
+      return {
+        success: false,
+        message: error.message
+      };
+
+    }
+
+};
