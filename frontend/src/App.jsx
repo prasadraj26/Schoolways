@@ -4,7 +4,11 @@ import {
   Navigate
 } from "react-router-dom";
 
+// AUTH
+
 import Login from "./pages/Login";
+
+// DASHBOARDS
 
 import AdminDashboard
   from "./pages/AdminDashboard";
@@ -14,6 +18,8 @@ import TeacherDashboard
 
 import ParentDashboard
   from "./pages/ParentDashboard";
+
+// COMMON PAGES
 
 import Students
   from "./pages/Students";
@@ -26,6 +32,28 @@ import Marks
 
 import Reports
   from "./pages/Reports";
+
+// ADMIN PAGES
+
+import AddStudent
+  from "./pages/admin/AddStudent";
+
+import AddTeacher
+  from "./pages/admin/AddTeacher";
+
+import AddClass
+  from "./pages/admin/AddClass";
+
+import ManageStudents
+  from "./pages/admin/ManageStudents";
+
+import ManageTeachers
+  from "./pages/admin/ManageTeachers";
+
+import EditStudent
+  from "./pages/admin/EditStudent";
+
+// PROTECTED ROUTE
 
 import ProtectedRoute
   from "./components/ProtectedRoute";
@@ -49,7 +77,9 @@ function App() {
         path="/admin"
         element={
           <ProtectedRoute role="admin">
+
             <AdminDashboard />
+
           </ProtectedRoute>
         }
       />
@@ -60,7 +90,9 @@ function App() {
         path="/teacher"
         element={
           <ProtectedRoute role="teacher">
+
             <TeacherDashboard />
+
           </ProtectedRoute>
         }
       />
@@ -71,7 +103,9 @@ function App() {
         path="/parent"
         element={
           <ProtectedRoute role="parent">
+
             <ParentDashboard />
+
           </ProtectedRoute>
         }
       />
@@ -82,7 +116,9 @@ function App() {
         path="/students"
         element={
           <ProtectedRoute>
+
             <Students />
+
           </ProtectedRoute>
         }
       />
@@ -93,7 +129,9 @@ function App() {
         path="/attendance"
         element={
           <ProtectedRoute>
+
             <Attendance />
+
           </ProtectedRoute>
         }
       />
@@ -104,7 +142,9 @@ function App() {
         path="/marks"
         element={
           <ProtectedRoute>
+
             <Marks />
+
           </ProtectedRoute>
         }
       />
@@ -115,12 +155,92 @@ function App() {
         path="/reports"
         element={
           <ProtectedRoute>
+
             <Reports />
+
           </ProtectedRoute>
         }
       />
 
-      {/* INVALID ROUTES */}
+      {/* ADD STUDENT */}
+
+      <Route
+        path="/add-student"
+        element={
+          <ProtectedRoute role="admin">
+
+            <AddStudent />
+
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ADD TEACHER */}
+
+      <Route
+        path="/add-teacher"
+        element={
+          <ProtectedRoute role="admin">
+
+            <AddTeacher />
+
+          </ProtectedRoute>
+        }
+      />
+
+      {/* ADD CLASS */}
+
+      <Route
+        path="/add-class"
+        element={
+          <ProtectedRoute role="admin">
+
+            <AddClass />
+
+          </ProtectedRoute>
+        }
+      />
+
+      {/* MANAGE STUDENTS */}
+
+      <Route
+        path="/manage-students"
+        element={
+          <ProtectedRoute role="admin">
+
+            <ManageStudents />
+
+          </ProtectedRoute>
+        }
+      />
+
+      {/* MANAGE TEACHERS */}
+
+      <Route
+        path="/manage-teachers"
+        element={
+          <ProtectedRoute role="admin">
+
+            <ManageTeachers />
+
+          </ProtectedRoute>
+        }
+      />
+
+      {/* EDIT STUDENT */}
+
+      <Route
+        path="/edit-student/:id"
+        element={
+          <ProtectedRoute role="admin">
+
+            <EditStudent />
+
+          </ProtectedRoute>
+        }
+      />
+
+      {/* INVALID ROUTE */}
 
       <Route
         path="*"
