@@ -8,51 +8,23 @@ import Sidebar from "../components/Sidebar";
 
 import {
   addStudent,
-  getStudents,
   deleteStudent
 } from "../services/studentService";
+import { useCollectionRealtime } from "../hooks/useRealtime";
 
 function Students() {
 
   // STATES
 
-  const [students, setStudents] =
-    useState([]);
+  const { data: studentsData } = useCollectionRealtime("students");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterClass, setFilterClass] = useState("");
 
-  const [formData, setFormData] =
-    useState({
-      name: "",
-      className: "",
-      roll: ""
-    });
-
-  // FETCH STUDENTS
-
-  const fetchStudents =
-    async () => {
-
-      const response =
-        await getStudents();
-
-      if (response.success) {
-
-        setStudents(response.data);
-
-      } else {
-
-        console.log(
-          "Fetch Failed"
-        );
-
-      }
-
-    };
-
-  // LOAD ON START
-
-  useEffect(() => {
-    fetchStudents();
-  }, []);
+  const students = studentsData.filter(s => {
+    const matchesSearch = s.name?.toLowerCase().includes(searchTerm.toLowerCase()) || false;
+    const matchesClass = filterClass ? s.className === filterClass : true;
+    return matchesSearch && matchesClass;
+  });
 
   // HANDLE INPUT
 
@@ -97,9 +69,7 @@ function Students() {
           "Student Added ✅"
         );
 
-        // REFRESH TABLE
-
-        fetchStudents();
+        // Table is auto-refreshed via real-time hook
 
         // RESET FORM
 
@@ -126,12 +96,6 @@ function Students() {
 
       const response =
         await deleteStudent(id);
-
-      if (response.success) {
-
-        fetchStudents();
-
-      }
 
     };
 
@@ -263,6 +227,21 @@ function Students() {
           >
             Students List
           </h2>
+
+          <div style={{ display: 'flex', gap: '16px', marginBottom: '20px' }}>
+            <input 
+              type="text" 
+              placeholder="Search by Name..." 
+              value={searchTerm} 
+              onChange={(e) => setSearchTerm(e.target.value)} 
+            />
+            <input 
+              type="text" 
+              placeholder="Filter by Class..." 
+              value={filterClass} 
+              onChange={(e) => setFilterClass(e.target.value)} 
+            />
+          </div>
 
           <div className="table-container">
 

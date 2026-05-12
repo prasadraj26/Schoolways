@@ -10,6 +10,8 @@ import {
 } from "firebase/firestore";
 
 import { db } from "../firebase/firebase";
+import { useCollectionRealtime } from "../hooks/useRealtime";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 function AdminDashboard() {
 
   // NAVIGATION
@@ -17,224 +19,13 @@ function AdminDashboard() {
   const navigate =
     useNavigate();
 
-  // STATES
-
-  const [students, setStudents] =
-    useState([]);
-
-  const [teachers, setTeachers] =
-    useState([]);
-
-  const [attendance, setAttendance] =
-    useState([]);
-
-  const [classes, setClasses] =
-    useState([]);
-
-  const [notifications, setNotifications] =
-    useState([]);
-
-  const [parents, setParents] =
-    useState([]);
-
-  // FETCH DATA
-
-  useEffect(() => {
-
-    fetchStudents();
-    fetchTeachers();
-    fetchAttendance();
-    fetchClasses();
-    fetchNotifications();
-    fetchParents();
-
-  }, []);
-
-  // FETCH STUDENTS
-
-  const fetchStudents =
-    async () => {
-
-      try {
-
-        const snapshot =
-          await getDocs(
-            collection(
-              db,
-              "students"
-            )
-          );
-
-        const data =
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data()
-          }));
-
-        setStudents(data);
-
-      } catch (error) {
-
-        console.log(error);
-
-      }
-
-    };
-
-  // FETCH TEACHERS
-
-  const fetchTeachers =
-    async () => {
-
-      try {
-
-        const snapshot =
-          await getDocs(
-            collection(
-              db,
-              "teachers"
-            )
-          );
-
-        const data =
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data()
-          }));
-
-        setTeachers(data);
-
-      } catch (error) {
-
-        console.log(error);
-
-      }
-
-    };
-
-  // FETCH ATTENDANCE
-
-  const fetchAttendance =
-    async () => {
-
-      try {
-
-        const snapshot =
-          await getDocs(
-            collection(
-              db,
-              "attendance"
-            )
-          );
-
-        const data =
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data()
-          }));
-
-        setAttendance(data);
-
-      } catch (error) {
-
-        console.log(error);
-
-      }
-
-    };
-
-  // FETCH CLASSES
-
-  const fetchClasses =
-    async () => {
-
-      try {
-
-        const snapshot =
-          await getDocs(
-            collection(
-              db,
-              "classes"
-            )
-          );
-
-        const data =
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data()
-          }));
-
-        setClasses(data);
-
-      } catch (error) {
-
-        console.log(error);
-
-      }
-
-    };
-
-  // FETCH NOTIFICATIONS
-
-  const fetchNotifications =
-    async () => {
-
-      try {
-
-        const snapshot =
-          await getDocs(
-            collection(
-              db,
-              "notifications"
-            )
-          );
-
-        const data =
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data()
-          }));
-
-        setNotifications(data);
-
-      } catch (error) {
-
-        console.log(error);
-
-      }
-
-    };
-
-  // FETCH PARENTS
-
-  const fetchParents =
-    async () => {
-
-      try {
-
-        const snapshot =
-          await getDocs(
-            collection(
-              db,
-              "parents"
-            )
-          );
-
-        const data =
-          snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data()
-          }));
-
-        setParents(data);
-
-      } catch (error) {
-
-        console.log(error);
-
-      }
-
-    };
+  // REALTIME DATA
+  const { data: students } = useCollectionRealtime("students");
+  const { data: teachers } = useCollectionRealtime("teachers");
+  const { data: attendance } = useCollectionRealtime("attendance");
+  const { data: classes } = useCollectionRealtime("classes");
+  const { data: notifications } = useCollectionRealtime("notifications");
+  const { data: parents } = useCollectionRealtime("parents");
 
   // ATTENDANCE %
 
@@ -299,6 +90,15 @@ function AdminDashboard() {
       color: "#ef4444"
     }
 
+  ];
+
+  // MOCK CHART DATA (Ideally computed from attendance data)
+  const chartData = [
+    { name: "Mon", attendance: 95 },
+    { name: "Tue", attendance: 92 },
+    { name: "Wed", attendance: 88 },
+    { name: "Thu", attendance: 94 },
+    { name: "Fri", attendance: 85 }
   ];
 
   return (
@@ -394,48 +194,18 @@ function AdminDashboard() {
                 marginBottom: "20px"
               }}
             >
-              📊 School Analytics
+              📊 Attendance Trends
             </h2>
 
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                gap: "16px"
-              }}
-            >
-
-              <div>
-                🏆 Top Performing Class:
-                <strong>
-                  {" "}10-A
-                </strong>
-              </div>
-
-              <div>
-                ⚠️ Low Attendance Alerts:
-                <strong>
-                  {" "}
-                  {lowAttendance}
-                </strong>
-              </div>
-
-              <div>
-                👩‍🏫 Active Teachers:
-                <strong>
-                  {" "}
-                  {teachers.length}
-                </strong>
-              </div>
-
-              <div>
-                👨‍🎓 Total Students:
-                <strong>
-                  {" "}
-                  {students.length}
-                </strong>
-              </div>
-
+            <div style={{ width: '100%', height: 250 }}>
+              <ResponsiveContainer>
+                <BarChart data={chartData}>
+                  <XAxis dataKey="name" stroke="#0f172a" />
+                  <YAxis stroke="#0f172a" />
+                  <Tooltip cursor={{fill: 'rgba(255,255,255,0.2)'}} contentStyle={{ borderRadius: '10px', border: 'none', background: 'rgba(255,255,255,0.8)' }} />
+                  <Bar dataKey="attendance" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
 
           </div>

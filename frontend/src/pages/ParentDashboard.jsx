@@ -1,21 +1,24 @@
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
+import { useAuthStore } from "../hooks/useAuth";
+import { useCollectionRealtime } from "../hooks/useRealtime";
 
 function ParentDashboard() {
+  const { user } = useAuthStore();
+  
+  // Real-time query for the parent's child (assuming parentId matches user.uid)
+  const { data: students } = useCollectionRealtime("students", [['parentId', '==', user?.uid]]);
+  const student = students.length > 0 ? students[0] : null;
+
+  // Notifications for the parent
+  const { data: notifications } = useCollectionRealtime("notifications", [['targetRole', 'in', ['all', 'parent']]]);
 
   const studentInfo = {
-    name: "Arun Kumar",
-    className: "10-A",
-    attendance: "92%",
-    performance: "A+"
+    name: student?.name || "No child assigned",
+    className: student?.className || "-",
+    attendance: "Pending",
+    performance: "Pending"
   };
-
-  const notifications = [
-    "📢 Midterm exam results published",
-    "📅 Parent-teacher meeting on Friday",
-    "📘 Science assignment uploaded",
-    "⚠️ Attendance below 75% warning for some students"
-  ];
 
   return (
     <div className="app-container">
@@ -172,20 +175,24 @@ function ParentDashboard() {
             }}
           >
 
-            {notifications.map((item, index) => (
-
-              <div
-                key={index}
-                style={{
-                  padding: "18px",
-                  borderRadius: "16px",
-                  background: "rgba(255,255,255,0.05)"
-                }}
-              >
-                {item}
-              </div>
-
-            ))}
+            {notifications.length === 0 ? (
+               <div style={{ padding: "18px", borderRadius: "16px", background: "rgba(255,255,255,0.05)" }}>
+                 No new notifications.
+               </div>
+            ) : (
+              notifications.map((item, index) => (
+                <div
+                  key={index}
+                  style={{
+                    padding: "18px",
+                    borderRadius: "16px",
+                    background: "rgba(255,255,255,0.05)"
+                  }}
+                >
+                  {item.message || item.title || "Notification"}
+                </div>
+              ))
+            )}
 
           </div>
 

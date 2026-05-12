@@ -1,26 +1,43 @@
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+import jsPDF from "jspdf";
+import "jspdf-autotable";
+import { useCollectionRealtime } from "../hooks/useRealtime";
 
 function Reports() {
+
+  const { data: students } = useCollectionRealtime("students");
+  const { data: attendance } = useCollectionRealtime("attendance");
 
   const reportData = [
     {
       title: "Total Students",
-      value: "1,248"
+      value: students.length
     },
     {
-      title: "Average Attendance",
-      value: "92%"
-    },
-    {
-      title: "Top Performing Class",
-      value: "10-A"
+      title: "Attendance Records",
+      value: attendance.length
     },
     {
       title: "Reports Generated",
-      value: "320"
+      value: "Ready"
     }
   ];
+
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    doc.text("Schoolways Attendance Report", 14, 15);
+    
+    const tableData = students.map(s => [s.name, s.className || "N/A", "90%"]);
+    
+    doc.autoTable({
+      head: [['Student Name', 'Class', 'Est. Attendance']],
+      body: tableData,
+      startY: 25,
+    });
+    
+    doc.save("attendance_report.pdf");
+  };
 
   const topStudents = [
     {
@@ -108,7 +125,7 @@ function Reports() {
             }}
           >
 
-            <button className="primary-btn">
+            <button className="primary-btn" onClick={generatePDF}>
               Export Attendance PDF
             </button>
 

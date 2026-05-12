@@ -3,6 +3,8 @@ import {
   Route,
   Navigate
 } from "react-router-dom";
+import { useEffect } from "react";
+import { initializeAuthListener } from "./hooks/useAuth";
 
 // AUTH
 
@@ -59,6 +61,10 @@ import ProtectedRoute
   from "./components/ProtectedRoute";
 
 function App() {
+  useEffect(() => {
+    const unsubscribe = initializeAuthListener();
+    return () => unsubscribe();
+  }, []);
 
   return (
 

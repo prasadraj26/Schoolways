@@ -1,51 +1,143 @@
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
 
+import { useAuthStore } from "../hooks/useAuth";
+import { useCollectionRealtime } from "../hooks/useRealtime";
+
 function TeacherDashboard() {
 
+  const { user } = useAuthStore();
+
+  // =========================
+  // CLASSES
+  // =========================
+
+  const { data: classes } =
+    useCollectionRealtime(
+      "classes",
+      user?.uid
+        ? [['teacherId', '==', user.uid]]
+        : []
+    );
+
+  const classIds =
+    classes.map((c) => c.id);
+
+  // =========================
+  // STUDENTS
+  // =========================
+
+  const { data: students } =
+    useCollectionRealtime(
+      "students",
+      classIds.length > 0
+        ? [['classId', 'in', classIds.slice(0, 10)]]
+        : []
+    );
+
+  // =========================
+  // ATTENDANCE
+  // =========================
+
+  const { data: attendance } =
+    useCollectionRealtime(
+      "attendance",
+      user?.uid
+        ? [['teacherId', '==', user.uid]]
+        : []
+    );
+
+  // =========================
+  // ASSIGNMENTS
+  // =========================
+
+  const { data: assignments } =
+    useCollectionRealtime(
+      "assignments",
+      user?.uid
+        ? [['teacherId', '==', user.uid]]
+        : []
+    );
+
+  // =========================
+  // ACTIVITIES
+  // =========================
+
+  const { data: activities } =
+    useCollectionRealtime(
+      "activities"
+    );
+
+  // =========================
+  // ATTENDANCE %
+  // =========================
+
+  const attendancePercentage =
+    attendance.length > 0
+      ? Math.round(
+          (
+            attendance.filter(
+              (a) =>
+                a.status === "Present"
+            ).length /
+            attendance.length
+          ) * 100
+        )
+      : 0;
+
+  // =========================
+  // DASHBOARD STATS
+  // =========================
+
   const stats = [
+
     {
       title: "Classes Assigned",
-      value: "6"
+      value: classes.length
     },
+
     {
       title: "Students",
-      value: "240"
+      value: students.length
     },
+
     {
-      title: "Attendance Updated",
-      value: "91%"
+      title: "Attendance %",
+      value: `${attendancePercentage}%`
     },
+
     {
       title: "Assignments Uploaded",
-      value: "18"
+      value: assignments.length
     }
+
   ];
 
   return (
+
     <div className="app-container">
 
-      {/* Sidebar */}
+      {/* SIDEBAR */}
 
       <Sidebar role="teacher" />
 
-      {/* Main Content */}
+      {/* MAIN */}
 
       <div className="main-content">
 
-        {/* Navbar */}
+        {/* NAVBAR */}
 
         <Navbar title="Teacher Dashboard" />
 
-        {/* Title */}
+        {/* TITLE */}
 
         <h1 className="page-title">
           Welcome Teacher 👩‍🏫
         </h1>
 
-        {/* Statistics */}
+        {/* STATS */}
 
-        <div className="grid grid-3">
+        <div className="grid grid-4">
 
           {stats.map((item, index) => (
 
@@ -55,6 +147,7 @@ function TeacherDashboard() {
             >
 
               <h3>{item.title}</h3>
+
               <p>{item.value}</p>
 
             </div>
@@ -63,7 +156,7 @@ function TeacherDashboard() {
 
         </div>
 
-        {/* Today's Schedule */}
+        {/* TODAY'S SCHEDULE */}
 
         <div
           className="glass-card"
@@ -89,41 +182,46 @@ function TeacherDashboard() {
             }}
           >
 
-            <div
-              style={{
-                padding: "18px",
-                borderRadius: "16px",
-                background: "rgba(255,255,255,0.05)"
-              }}
-            >
-              📘 Mathematics — Class 10-A — 9:00 AM
-            </div>
+            {classes.length === 0 ? (
 
-            <div
-              style={{
-                padding: "18px",
-                borderRadius: "16px",
-                background: "rgba(255,255,255,0.05)"
-              }}
-            >
-              📗 Science — Class 9-B — 11:00 AM
-            </div>
+              <div
+                style={{
+                  padding: "18px",
+                  borderRadius: "16px",
+                  background:
+                    "rgba(255,255,255,0.05)"
+                }}
+              >
+                No classes assigned yet.
+              </div>
 
-            <div
-              style={{
-                padding: "18px",
-                borderRadius: "16px",
-                background: "rgba(255,255,255,0.05)"
-              }}
-            >
-              📙 English — Class 8-C — 2:00 PM
-            </div>
+            ) : (
+
+              classes.map((cls) => (
+
+                <div
+                  key={cls.id}
+                  style={{
+                    padding: "18px",
+                    borderRadius: "16px",
+                    background:
+                      "rgba(255,255,255,0.05)"
+                  }}
+                >
+
+                  📘 {cls.name || "Unnamed Class"}
+
+                </div>
+
+              ))
+
+            )}
 
           </div>
 
         </div>
 
-        {/* Recent Activities */}
+        {/* RECENT ACTIVITIES */}
 
         <div
           className="glass-card"
@@ -149,43 +247,53 @@ function TeacherDashboard() {
             }}
           >
 
-            <div
-              style={{
-                padding: "18px",
-                borderRadius: "16px",
-                background: "rgba(255,255,255,0.05)"
-              }}
-            >
-              ✅ Attendance marked for Class 10-A
-            </div>
+            {activities.length === 0 ? (
 
-            <div
-              style={{
-                padding: "18px",
-                borderRadius: "16px",
-                background: "rgba(255,255,255,0.05)"
-              }}
-            >
-              📝 Marks updated for Midterm Examination
-            </div>
+              <div
+                style={{
+                  padding: "18px",
+                  borderRadius: "16px",
+                  background:
+                    "rgba(255,255,255,0.05)"
+                }}
+              >
+                No recent activities.
+              </div>
 
-            <div
-              style={{
-                padding: "18px",
-                borderRadius: "16px",
-                background: "rgba(255,255,255,0.05)"
-              }}
-            >
-              📂 Assignment uploaded for Science
-            </div>
+            ) : (
+
+              activities
+                .slice(0, 5)
+                .map((activity) => (
+
+                  <div
+                    key={activity.id}
+                    style={{
+                      padding: "18px",
+                      borderRadius: "16px",
+                      background:
+                        "rgba(255,255,255,0.05)"
+                    }}
+                  >
+
+                    {activity.message}
+
+                  </div>
+
+                ))
+
+            )}
 
           </div>
 
         </div>
 
       </div>
+
     </div>
+
   );
+
 }
 
 export default TeacherDashboard;
