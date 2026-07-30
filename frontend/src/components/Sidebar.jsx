@@ -1,7 +1,15 @@
 import { Link, useLocation } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Users,
+  CalendarCheck,
+  GraduationCap,
+  FileText,
+  School,
+  X
+} from "lucide-react";
 
-function Sidebar({ role }) {
-
+function Sidebar({ role, isOpen, onClose }) {
   const location = useLocation();
 
   const menuItems = [
@@ -12,104 +20,95 @@ function Sidebar({ role }) {
           ? "/admin"
           : role === "teacher"
           ? "/teacher"
-          : "/parent"
+          : "/parent",
+      icon: LayoutDashboard
     },
     {
       name: "Students",
-      path: "/students"
+      path: "/students",
+      icon: Users
     },
     {
       name: "Attendance",
-      path: "/attendance"
+      path: "/attendance",
+      icon: CalendarCheck
     },
     {
       name: "Marks",
-      path: "/marks"
+      path: "/marks",
+      icon: GraduationCap
     },
     {
       name: "Reports",
-      path: "/reports"
+      path: "/reports",
+      icon: FileText
     }
   ];
 
   return (
-    <div
-      className="glass-card"
-      style={{
-        width: "260px",
-        minHeight: "100vh",
-        padding: "24px",
-        display: "flex",
-        flexDirection: "column",
-        gap: "20px",
-        position: "sticky",
-        top: 0
-      }}
-    >
+    <>
+      {/* Mobile Backdrop Overlay */}
+      {isOpen && (
+        <div
+          className="mobile-drawer-overlay"
+          onClick={onClose}
+        />
+      )}
 
-      {/* Logo */}
+      <div className={`sidebar-container ${isOpen ? "open" : ""}`}>
+        {/* Header & Logo */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <div style={{
+              width: "36px",
+              height: "36px",
+              borderRadius: "8px",
+              background: "rgba(255, 255, 255, 0.15)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              color: "#ffffff"
+            }}>
+              <School size={22} />
+            </div>
+            <div>
+              <h1 className="sidebar-logo-title">Schoolways</h1>
+              <p className="sidebar-logo-subtitle">Management System</p>
+            </div>
+          </div>
 
-      <div>
+          {/* Close button for mobile drawer */}
+          <button
+            onClick={onClose}
+            className="mobile-menu-btn"
+            style={{ display: isOpen ? "flex" : "none", color: "#ffffff", background: "rgba(255,255,255,0.1)", border: "none" }}
+            aria-label="Close sidebar"
+          >
+            <X size={20} />
+          </button>
+        </div>
 
-        <h1
-          style={{
-            fontSize: "30px",
-            fontWeight: "700"
-          }}
-        >
-          Schoolways
-        </h1>
+        {/* Navigation Items */}
+        <div className="sidebar-nav-list">
+          {menuItems.map((item, index) => {
+            const isActive = location.pathname === item.path;
+            const IconComponent = item.icon;
 
-        <p
-          style={{
-            opacity: "0.7",
-            marginTop: "4px",
-            fontSize: "14px"
-          }}
-        >
-          School Management System
-        </p>
-
+            return (
+              <Link
+                key={index}
+                to={item.path}
+                className={`sidebar-nav-item ${isActive ? "active" : ""}`}
+                onClick={() => onClose && onClose()}
+              >
+                <IconComponent size={18} />
+                <span>{item.name}</span>
+              </Link>
+            );
+          })}
+        </div>
       </div>
-
-      {/* Navigation */}
-
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "12px",
-          marginTop: "20px"
-        }}
-      >
-
-        {menuItems.map((item, index) => {
-
-          const isActive =
-            location.pathname === item.path;
-
-          return (
-            <Link
-              key={index}
-              to={item.path}
-              style={{
-                padding: "14px 18px",
-                borderRadius: "14px",
-                background: isActive
-                  ? "#2563eb"
-                  : "rgba(255,255,255,0.05)",
-                transition: "0.3s",
-                fontWeight: "500"
-              }}
-            >
-              {item.name}
-            </Link>
-          );
-        })}
-
-      </div>
-
-    </div>
+    </>
   );
 }
 

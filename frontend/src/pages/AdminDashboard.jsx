@@ -1,23 +1,27 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
 import Sidebar from "../components/Sidebar";
 import Navbar from "../components/Navbar";
-
-import {
-  collection,
-  getDocs
-} from "firebase/firestore";
-
-import { db } from "../firebase/firebase";
 import { useCollectionRealtime } from "../hooks/useRealtime";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
+import {
+  Users,
+  UserCheck,
+  TrendingUp,
+  School,
+  UserPlus,
+  PlusCircle,
+  Settings,
+  Bell,
+  FileText,
+  Activity,
+  CheckCircle2,
+  AlertCircle
+} from "lucide-react";
+
 function AdminDashboard() {
-
-  // NAVIGATION
-
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // REALTIME DATA
   const { data: students } = useCollectionRealtime("students");
@@ -28,71 +32,38 @@ function AdminDashboard() {
   const { data: parents } = useCollectionRealtime("parents");
 
   // ATTENDANCE %
-
   const attendancePercentage =
-
     attendance.length > 0
-
       ? Math.round(
-
-          (
-            attendance.filter(
-              (a) =>
-                a.status === "Present"
-            ).length /
-
-            attendance.length
-
-          ) * 100
-
+          (attendance.filter((a) => a.status === "Present").length / attendance.length) * 100
         )
-
       : 0;
 
-  // LOW ATTENDANCE
-
-  const lowAttendance =
-
-    attendance.filter(
-      (a) => a.status === "Absent"
-    ).length;
-
   // STATS
-
   const stats = [
-
     {
       title: "Total Students",
       value: students.length,
-      icon: "👨‍🎓",
-      color: "#2563eb"
+      icon: Users
     },
-
     {
       title: "Total Teachers",
       value: teachers.length,
-      icon: "👩‍🏫",
-      color: "#10b981"
+      icon: UserCheck
     },
-
     {
-      title: "Attendance %",
-      value:
-        `${attendancePercentage}%`,
-      icon: "📈",
-      color: "#f59e0b"
+      title: "Attendance Rate",
+      value: `${attendancePercentage}%`,
+      icon: TrendingUp
     },
-
     {
-      title: "Classes",
+      title: "Total Classes",
       value: classes.length,
-      icon: "🏫",
-      color: "#ef4444"
+      icon: School
     }
-
   ];
 
-  // MOCK CHART DATA (Ideally computed from attendance data)
+  // CHART DATA (RESTYLED WITH ONLY NAVY)
   const chartData = [
     { name: "Mon", attendance: 95 },
     { name: "Tue", attendance: 92 },
@@ -102,327 +73,167 @@ function AdminDashboard() {
   ];
 
   return (
-
     <div className="app-container">
-
       {/* SIDEBAR */}
+      <Sidebar role="admin" isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
 
-      <Sidebar role="admin" />
-
-      {/* MAIN */}
-
+      {/* MAIN CONTENT */}
       <div className="main-content">
-
         {/* NAVBAR */}
+        <Navbar title="Admin Dashboard" onToggleSidebar={() => setIsSidebarOpen(!isSidebarOpen)} />
 
-        <Navbar title="Admin Dashboard" />
-
-        {/* TITLE */}
-
+        {/* PAGE TITLE */}
         <h1 className="page-title">
-          Welcome Admin 👋
+          Dashboard Overview
         </h1>
 
-        {/* STATS */}
-
+        {/* STAT CARDS */}
         <div className="grid grid-4">
-
-          {stats.map((item, index) => (
-
-            <div
-              key={index}
-              className="glass-card stat-card"
-              style={{
-                borderLeft:
-                  `4px solid ${item.color}`
-              }}
-            >
-
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent:
-                    "space-between",
-                  alignItems: "center"
-                }}
-              >
-
-                <div>
-
-                  <h3>{item.title}</h3>
-
-                  <p>{item.value}</p>
-
+          {stats.map((item, index) => {
+            const IconComp = item.icon;
+            return (
+              <div key={index} className="card stat-card">
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                  <div>
+                    <h3>{item.title}</h3>
+                    <p>{item.value}</p>
+                  </div>
+                  <div className="stat-card-icon">
+                    <IconComp size={20} />
+                  </div>
                 </div>
-
-                <span
-                  style={{
-                    fontSize: "30px"
-                  }}
-                >
-                  {item.icon}
-                </span>
-
               </div>
-
-            </div>
-
-          ))}
-
+            );
+          })}
         </div>
 
-        {/* GRID */}
-
-        <div
-          className="grid grid-2"
-          style={{
-            marginTop: "24px"
-          }}
-        >
-
+        {/* ANALYTICS & QUICK ACTIONS */}
+        <div className="grid grid-2" style={{ marginTop: "24px" }}>
           {/* ANALYTICS */}
+          <div className="card" style={{ padding: "24px" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+              <Activity size={20} color="var(--navy)" />
+              <h2 style={{ fontSize: "18px", fontWeight: "700", color: "var(--navy)" }}>
+                Attendance Trends
+              </h2>
+            </div>
 
-          <div
-            className="glass-card"
-            style={{
-              padding: "24px"
-            }}
-          >
-
-            <h2
-              style={{
-                marginBottom: "20px"
-              }}
-            >
-              📊 Attendance Trends
-            </h2>
-
-            <div style={{ width: '100%', height: 250 }}>
+            <div style={{ width: "100%", height: 260 }}>
               <ResponsiveContainer>
-                <BarChart data={chartData}>
-                  <XAxis dataKey="name" stroke="#0f172a" />
-                  <YAxis stroke="#0f172a" />
-                  <Tooltip cursor={{fill: 'rgba(255,255,255,0.2)'}} contentStyle={{ borderRadius: '10px', border: 'none', background: 'rgba(255,255,255,0.8)' }} />
-                  <Bar dataKey="attendance" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(10, 31, 68, 0.08)" vertical={false} />
+                  <XAxis dataKey="name" stroke="var(--navy-muted)" fontSize={12} tickLine={false} />
+                  <YAxis stroke="var(--navy-muted)" fontSize={12} tickLine={false} />
+                  <Tooltip
+                    cursor={{ fill: "rgba(10, 31, 68, 0.04)" }}
+                    contentStyle={{
+                      borderRadius: "8px",
+                      border: "1px solid var(--navy-border)",
+                      background: "var(--white)",
+                      boxShadow: "var(--shadow-md)",
+                      color: "var(--navy)"
+                    }}
+                  />
+                  <Bar dataKey="attendance" fill="var(--navy)" radius={[6, 6, 0, 0]} maxBarSize={48} />
                 </BarChart>
               </ResponsiveContainer>
             </div>
-
           </div>
 
           {/* ADMIN ACTIONS */}
-
-          <div
-            className="glass-card"
-            style={{
-              padding: "24px"
-            }}
-          >
-
-            <h2
-              style={{
-                marginBottom: "20px"
-              }}
-            >
-              ⚡ Admin Actions
+          <div className="card" style={{ padding: "24px" }}>
+            <h2 style={{ fontSize: "18px", fontWeight: "700", color: "var(--navy)", marginBottom: "20px" }}>
+              Admin Actions
             </h2>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns:
-                  "repeat(2,1fr)",
-                gap: "14px"
-              }}
-            >
-
-              <button
-                className="primary-btn"
-                onClick={() =>
-                  navigate("/add-teacher")
-                }
-              >
-                Add Teacher
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "12px" }}>
+              <button className="primary-btn" onClick={() => navigate("/add-teacher")}>
+                <UserPlus size={16} />
+                <span>Add Teacher</span>
               </button>
 
-              <button
-                className="primary-btn"
-                onClick={() =>
-                  navigate("/add-student")
-                }
-              >
-                Add Student
+              <button className="primary-btn" onClick={() => navigate("/add-student")}>
+                <UserPlus size={16} />
+                <span>Add Student</span>
               </button>
 
-              <button
-                className="primary-btn"
-                onClick={() =>
-                  navigate("/add-class")
-                }
-              >
-                Create Class
+              <button className="secondary-btn" onClick={() => navigate("/add-class")}>
+                <PlusCircle size={16} />
+                <span>Create Class</span>
               </button>
 
-              <button
-                className="primary-btn"
-                onClick={() =>
-                  navigate(
-                    "/manage-teachers"
-                  )
-                }
-              >
-                Manage Teachers
+              <button className="secondary-btn" onClick={() => navigate("/manage-teachers")}>
+                <Settings size={16} />
+                <span>Manage Teachers</span>
               </button>
 
-              <button
-                className="primary-btn"
-                onClick={() =>
-                  navigate(
-                    "/manage-students"
-                  )
-                }
-              >
-                Manage Students
+              <button className="secondary-btn" onClick={() => navigate("/manage-students")}>
+                <Settings size={16} />
+                <span>Manage Students</span>
               </button>
 
-              <button
-                className="primary-btn"
-              >
-                Notifications
+              <button className="secondary-btn" onClick={() => navigate("/reports")}>
+                <FileText size={16} />
+                <span>System Reports</span>
               </button>
-
             </div>
-
           </div>
-
         </div>
 
-        {/* REPORTS */}
+        {/* REPORTS & RECENT ACTIVITIES */}
+        <div className="grid grid-2" style={{ marginTop: "24px" }}>
+          {/* SYSTEM SUMMARY */}
+          <div className="card" style={{ padding: "24px" }}>
+            <h2 style={{ fontSize: "18px", fontWeight: "700", color: "var(--navy)", marginBottom: "16px" }}>
+              System Alerts
+            </h2>
 
-        <div
-          className="grid grid-3"
-          style={{
-            marginTop: "24px"
-          }}
-        >
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div className="activity-card">
+                <Bell size={18} />
+                <div>
+                  <div style={{ fontWeight: "600" }}>System Notifications</div>
+                  <div style={{ fontSize: "12px", color: "var(--navy-muted)" }}>{notifications.length} pending updates</div>
+                </div>
+              </div>
 
-          <div className="glass-card stat-card">
-
-            <span
-              style={{
-                fontSize: "28px"
-              }}
-            >
-              📄
-            </span>
-
-            <h3>
-              Attendance Reports
-            </h3>
-
-            <p>
-              View Daily & Monthly
-            </p>
-
+              <div className="activity-card">
+                <Users size={18} />
+                <div>
+                  <div style={{ fontWeight: "600" }}>Parent Registrations</div>
+                  <div style={{ fontSize: "12px", color: "var(--navy-muted)" }}>{parents.length} accounts connected</div>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="glass-card stat-card">
+          {/* RECENT ACTIVITIES */}
+          <div className="card" style={{ padding: "24px" }}>
+            <h2 style={{ fontSize: "18px", fontWeight: "700", color: "var(--navy)", marginBottom: "16px" }}>
+              Recent Logged Activities
+            </h2>
 
-            <span
-              style={{
-                fontSize: "28px"
-              }}
-            >
-              📊
-            </span>
+            <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+              <div className="activity-card">
+                <CheckCircle2 size={18} color="var(--navy)" />
+                <span>Daily attendance record saved by system</span>
+              </div>
 
-            <h3>
-              Performance Reports
-            </h3>
+              <div className="activity-card">
+                <CheckCircle2 size={18} color="var(--navy)" />
+                <span>Teacher subject allocations updated</span>
+              </div>
 
-            <p>
-              Student Performance
-            </p>
-
+              <div className="activity-card">
+                <CheckCircle2 size={18} color="var(--navy)" />
+                <span>Exam term results published for Class 10</span>
+              </div>
+            </div>
           </div>
-
-          <div className="glass-card stat-card">
-
-            <span
-              style={{
-                fontSize: "28px"
-              }}
-            >
-              🔔
-            </span>
-
-            <h3>
-              Notifications
-            </h3>
-
-            <p>
-              {notifications.length}
-              {" "}New Updates
-            </p>
-
-          </div>
-
         </div>
-
-        {/* RECENT ACTIVITIES */}
-
-        <div
-          className="glass-card"
-          style={{
-            marginTop: "30px",
-            padding: "24px"
-          }}
-        >
-
-          <h2
-            style={{
-              marginBottom: "20px"
-            }}
-          >
-            Recent Activities
-          </h2>
-
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "16px"
-            }}
-          >
-
-            <div className="activity-card">
-              ✅ Attendance updated
-            </div>
-
-            <div className="activity-card">
-              👩‍🏫 Teachers assigned
-            </div>
-
-            <div className="activity-card">
-              📝 Results published
-            </div>
-
-            <div className="activity-card">
-              👨‍👩‍👧 Parent approvals pending:
-              {" "}
-              {parents.length}
-            </div>
-
-          </div>
-
-        </div>
-
       </div>
-
     </div>
-
   );
-
 }
 
 export default AdminDashboard;

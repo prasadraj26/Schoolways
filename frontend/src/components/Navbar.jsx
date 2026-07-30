@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
+import { Menu, LogOut, User } from "lucide-react";
 
-function Navbar({ title }) {
-
+function Navbar({ title, onToggleSidebar }) {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -10,109 +10,50 @@ function Navbar({ title }) {
   };
 
   return (
-    <div
-      className="glass-card"
-      style={{
-        padding: "18px 24px",
-        marginBottom: "24px",
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        gap: "20px",
-        flexWrap: "wrap"
-      }}
-    >
+    <div className="navbar-container">
+      {/* Left side: Mobile Toggle + Title */}
+      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+        {onToggleSidebar && (
+          <button
+            className="mobile-menu-btn"
+            onClick={onToggleSidebar}
+            aria-label="Toggle navigation menu"
+          >
+            <Menu size={20} />
+          </button>
+        )}
 
-      {/* Left */}
-
-      <div>
-        <h2
-          style={{
-            fontSize: "24px",
-            fontWeight: "600"
-          }}
-        >
-          {title}
-        </h2>
-
-        <p
-          style={{
-            opacity: "0.7",
-            marginTop: "4px",
-            fontSize: "14px"
-          }}
-        >
-          Welcome to Schoolways Management System
-        </p>
+        <div>
+          <h2 style={{ fontSize: "20px", fontWeight: "700", color: "var(--navy)", letterSpacing: "-0.01em" }}>
+            {title}
+          </h2>
+          <p style={{ fontSize: "12px", color: "var(--navy-muted)", marginTop: "2px" }}>
+            Schoolways Management System
+          </p>
+        </div>
       </div>
 
-      {/* Right */}
-
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "16px"
-        }}
-      >
-
-        {/* Profile */}
-
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "12px"
-          }}
-        >
-
-          <div
-            style={{
-              width: "42px",
-              height: "42px",
-              borderRadius: "50%",
-              background: "#2563eb",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: "600"
-            }}
-          >
-            A
+      {/* Right side: Profile & Logout */}
+      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div className="navbar-profile-avatar">
+            <User size={18} />
           </div>
-
-          <div>
-            <h4
-              style={{
-                fontSize: "15px"
-              }}
-            >
-              Admin
-            </h4>
-
-            <p
-              style={{
-                fontSize: "12px",
-                opacity: "0.7"
-              }}
-            >
-              schoolways@gmail.com
-            </p>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: "14px", fontWeight: "600", color: "var(--navy)", lineHeight: "1.2" }}>
+              User Account
+            </span>
+            <span style={{ fontSize: "11px", color: "var(--navy-muted)" }}>
+              Active Session
+            </span>
           </div>
-
         </div>
 
-        {/* Logout */}
-
-        <button
-          className="primary-btn"
-          onClick={handleLogout}
-        >
-          Logout
+        <button className="secondary-btn" onClick={handleLogout} style={{ padding: "8px 14px", fontSize: "13px" }}>
+          <LogOut size={16} />
+          <span>Logout</span>
         </button>
-
       </div>
-
     </div>
   );
 }
